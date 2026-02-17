@@ -1,73 +1,129 @@
 import streamlit as st
 from groq import Groq
+import pandas as pd
 
-# --- PAGE CONFIGURATION ---
-st.set_page_config(page_title="Agentic AI - Amol", page_icon="🚀", layout="centered")
+# --- PAGE CONFIG ---
+st.set_page_config(page_title="Aura Agentic AI", page_icon="💎", layout="wide")
 
-# --- ADVANCED CYBERPUNK CSS ---
+# --- ULTRA PREMIUM CSS ---
 st.markdown("""
     <style>
-    .stApp { background: radial-gradient(circle, #1a1a2e 0%, #0f0f1a 100%); color: #e0e0e0; }
-    h1 { text-align: center; color: #00d4ff; font-family: 'Orbitron', sans-serif; text-shadow: 0px 0px 15px #00d4ff; font-size: 50px; letter-spacing: 5px; margin-bottom: 0px; }
-    p.dev-text { text-align: center; color: #ff00ff; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; margin-top: -10px; }
-    .stTextInput>div>div>input { background-color: #16213e; color: #00ffcc; border: 2px solid #0f3460; border-radius: 15px; padding: 15px; font-size: 18px; }
-    div.stButton > button:first-child { background: linear-gradient(45deg, #ff00ff, #00d4ff); color: white; border: none; padding: 12px 30px; border-radius: 12px; font-weight: bold; font-size: 18px; width: 100%; transition: 0.5s; }
-    .output-box { background: rgba(0, 0, 0, 0.7); color: #a6e3a1; padding: 25px; border-radius: 20px; border: 1px solid #00ffcc; font-family: 'Consolas', monospace; margin-top: 20px; }
-    .user-msg { color: #f9e2af; font-weight: bold; border-bottom: 1px solid #313244; padding-bottom: 10px; margin-bottom: 15px; }
+    /* Animated Background */
+    .stApp {
+        background: #050505;
+        color: #ffffff;
+    }
+    
+    /* Glowing Border Animation */
+    @keyframes rotate {
+        100% { transform: rotate(360deg); }
+    }
+    
+    .glow-card {
+        position: relative;
+        background: #121212;
+        border-radius: 15px;
+        padding: 3px;
+        z-index: 1;
+        overflow: hidden;
+        margin-bottom: 25px;
+    }
+    
+    .glow-card::before {
+        content: '';
+        position: absolute;
+        width: 150%;
+        height: 150%;
+        background: conic-gradient(#00f2ff, #ff00c8, #00f2ff);
+        animation: rotate 4s linear infinite;
+        top: -25%;
+        left: -25%;
+        z-index: -1;
+    }
+    
+    .content-box {
+        background: #0f0f0f;
+        padding: 30px;
+        border-radius: 12px;
+        color: white;
+    }
+
+    /* Professional Title */
+    .main-title {
+        background: -webkit-linear-gradient(#00f2ff, #ff00c8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-size: 60px;
+        font-weight: 800;
+        text-align: center;
+        letter-spacing: -2px;
+    }
+
+    /* Buttons */
+    .stButton>button {
+        background: linear-gradient(90deg, #00f2ff, #ff00c8);
+        border: none;
+        border-radius: 8px;
+        color: white;
+        font-weight: bold;
+        padding: 15px;
+        width: 100%;
+        transition: 0.3s ease;
+    }
+    .stButton>button:hover {
+        box-shadow: 0 0 25px rgba(0, 242, 255, 0.6);
+        transform: scale(1.02);
+    }
     </style>
     """, unsafe_allow_html=True)
 
 # --- HEADER ---
-st.markdown("<h1>AGENTIC AI</h1>", unsafe_allow_html=True)
-st.markdown("<p class='dev-text'>● Developed by Amol ●</p>", unsafe_allow_html=True)
-st.write("---")
+st.markdown("<h1 class='main-title'>AURA AGENTIC AI</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align:center; opacity:0.6; margin-top:-20px;'>HIGH-PERFORMANCE INTELLIGENCE INTERFACE</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align:center; color:#00f2ff; font-weight:bold;'>OPERATOR: AMOL</p>", unsafe_allow_html=True)
+st.write("<br>", unsafe_allow_html=True)
 
-# --- API SETUP ---
+# --- SIDEBAR ---
+with st.sidebar:
+    st.markdown("### ⚙️ SYSTEM CONFIG")
+    st.write("---")
+    st.markdown("**Core:** Llama-3.1-8B")
+    st.markdown("**Latency:** 0.4ms")
+    st.write("---")
+    if st.button("RESET SESSION"):
+        st.session_state.history = []
+        st.rerun()
+
+# --- API ---
 GROQ_API_KEY = "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" 
 client = Groq(api_key=GROQ_API_KEY)
 
 if "history" not in st.session_state:
     st.session_state.history = []
 
-# --- INPUT SECTION ---
-user_input = st.text_input("", placeholder="Enter your query here...", key="input")
-
-col1, col2 = st.columns([3, 1])
-with col1:
-    submit_btn = st.button("🚀 INITIALIZE ANALYSIS")
-with col2:
-    if st.button("🔄 RESET"):
-        st.session_state.history = []
-        st.rerun()
-
-if submit_btn and user_input:
-    with st.spinner("Thinking..."):
+# --- INPUT AREA ---
+st.markdown('<div class="glow-card"><div class="content-box">', unsafe_allow_html=True)
+user_query = st.text_input("QUERY INPUT", placeholder="Ask me anything...", label_visibility="collapsed")
+if st.button("INITIALIZE ANALYSIS") and user_query:
+    with st.spinner("Processing..."):
         try:
-            system_instruction = (
-                "You are a professional AI Assistant. "
-                "1. If you don't know the answer, say you don't have enough data. "
-                "2. Provide logical and clear responses. "
-                "3. Keep the tone helpful and professional."
-            )
-            
             completion = client.chat.completions.create(
                 model="llama-3.1-8b-instant",
-                messages=[{"role": "system", "content": system_instruction},
-                          {"role": "user", "content": user_input}],
-                temperature=0.2
+                messages=[{"role": "user", "content": user_query}],
+                temperature=0.3
             )
-            ai_response = completion.choices[0].message.content.strip()
-            st.session_state.history.insert(0, (user_input, ai_response))
+            st.session_state.history.insert(0, (user_query, completion.choices[0].message.content))
         except Exception as e:
-            st.error(f"System Error: {str(e)}")
+            st.error(f"Error: {e}")
+st.markdown('</div></div>', unsafe_allow_html=True)
 
-# --- DISPLAY ---
-st.markdown("<p style='color:#00ffcc; font-family:monospace;'>[SYSTEM ACTIVE]</p>", unsafe_allow_html=True)
-
+# --- OUTPUT ---
 for q, a in st.session_state.history:
-    st.markdown(f"""
-    <div class="output-box">
-        <div class="user-msg">👤 QUERY > {q}</div>
-        <div class="ai-msg">🤖 RESPONSE > <br><br>{a}</div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(f'''
+        <div style="border-left: 4px solid #ff00c8; padding-left: 20px; margin-bottom: 30px;">
+            <p style="color:#00f2ff; font-weight:bold; font-size:12px;">// USER_QUERY</p>
+            <p style="font-size:18px;">{q}</p>
+            <p style="color:#ff00c8; font-weight:bold; font-size:12px; margin-top:15px;">// AGENT_RESPONSE</p>
+            <p style="opacity:0.9; line-height:1.6;">{a}</p>
+        </div>
+    ''', unsafe_allow_html=True)
